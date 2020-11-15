@@ -9,6 +9,8 @@ from guizero import App, Text, TextBox, PushButton, Slider, Picture,MenuBar, Box
 from tkinter import filedialog
 from datetime import datetime
 import errno
+import sys
+
 
 #load settings
 
@@ -18,7 +20,8 @@ def load_settings():
     """Load saved settings, if not exist create default settings.json"""
     # Reading JSON content from a file
  
-    settings_file = Path("./settings.json")
+    # change later
+    settings_file = Path.cwd() / 'settings.json'
     if settings_file.is_file():
         # file exists
         with open(settings_file, 'r') as f:
@@ -35,14 +38,15 @@ def load_settings():
             "gui_preview_y" : 100,
             "beam_pin" : 10,
             "pic_taken_led" : 8,
-            "pictures_directory" : '/home/pi/Documents',
+            "pictures_directory" : '/home/pi/Documents/Lots',
             "bounce_time" : 200,
             "picture_delay" : 200 ,#IN MILISECONDS
             "camera_shutter_speed" : 20000
         }
-    # Writing JSON content to a file using the dump method
-    with open(settings_file, 'w') as f:
-        json.dump(default_settings, f, sort_keys=True,indent=4)
+        # Writing JSON content to a file using the dump method
+        print("here")
+        with open(settings_file, 'w') as f:
+            json.dump(default_settings, f, sort_keys=True,indent=4)
     return default_settings
 
 def save_settings(settings_dict):
@@ -73,11 +77,7 @@ GPIO.setup(settings['pic_taken_led'] , GPIO.OUT, initial=GPIO.LOW)   # Set pin 8
 GPIO.setup(settings['beam_pin'], GPIO.IN,pull_up_down=GPIO.PUD_UP )   # Set pin 8 to be an output pin and set initial value to low (off)
 # pull_up_down=GPIO.PUD_UP #use this if not using 10k resistor
 
-#regular vars
-start_time = None
-end_time=None
 
-    
 def new_lot():
     print("new lot")
     global lotname, title
@@ -88,12 +88,14 @@ def new_lot():
             
             print(lotname)
             GPIO.remove_event_detect(40)
-            pictures_path = settings['picture_directory']  / lotname
+            pictures_path = Path(settings['pictures_directory'])  / lotname
             #lot already exists check
             pictures_path.mkdir(parents=True, exist_ok=False)
             #init cameras
+            print("starting preview")
             camera.start_preview()
-            sleep(2)#sleep to let camera's sensors adjust
+            sleep(2)
+            camera.stop_preview()
             
             #draw ui
             title.destroy()
@@ -102,7 +104,11 @@ def new_lot():
             #set up beam
             GPIO.add_event_detect(settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
         except :
-            app.error("Lot Exists","The Lot Already Exists")
+            # app.error("Lot Exists","The Lot Already Exists")
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+
     else:
         app.error("No lotname","You must enter a lot name")
     
@@ -208,6 +214,7 @@ view_pictures_window.hide()
 
 #load settings
 settings = load_settings()
+print(settings)
 
 #init the menu bar
 menubar = MenuBar(app,

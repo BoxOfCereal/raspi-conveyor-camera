@@ -1,0 +1,1 @@
+https://python-kasa.readthedocs.io
