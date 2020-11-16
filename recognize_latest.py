@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+
+import traceback
+
 import RPi.GPIO as GPIO    # Import Raspberry Pi GPIO library
 from picamera import PiCamera #Import camera lib
 from time import sleep,time   # Import the sleep function from the time module
@@ -13,6 +16,7 @@ import sys
 
 from modules.settings import load_settings, save_settings
 from modules.io import init_gpio
+from modules.camera_funcs import setup_camera,capture_image, get_last_pic
 
 def settings_window_handler():
     """Function to handle settings window"""
@@ -24,10 +28,9 @@ def calibration():
 
 settings = load_settings()
 lotname = None
-camera = PiCamera()
-camera.shutter_speed = settings['camera_shutter_speed']
 
 init_gpio()
+camera = setup_camera()
 
 
 def new_lot():
@@ -47,7 +50,7 @@ def new_lot():
             print("starting preview")
             camera.start_preview()
             sleep(2)
-            camera.stop_preview()
+            capture_image(lotname,camera)
             
             #draw ui
             title.destroy()
@@ -60,6 +63,7 @@ def new_lot():
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
+            print(traceback.format_exc())
 
     else:
         app.error("No lotname","You must enter a lot name")
@@ -89,13 +93,7 @@ def open_lot():
 def edit_lot():
     pass
 
-def capture_image():
-    """Captures an image from the camera with a timestamp """
-    global lotname
-    timestamp = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-    file_name = lotname + ' ' + timestamp + '.jpg'
-    full_path = (settings['pictures_directory']  / lotname).resolve()
-    camera.capture(str(full_path) + "/" + str(file_name))
+
 
 def beam_break_cb(chan):
     """Callback called when the beam is broken """
@@ -113,19 +111,14 @@ def beam_break_cb(chan):
             print('Input was HIGH')
         else:
             print('Input was LOW')
-            capture_image()
+            capture_image(lotname,camera)
             show_picture()    
 
-def get_last_pic() -> Path:
-    """ returns the lastest picture in the current lot folder """
-    p = (settings['pictures_directory'] / lotname).glob('**/*')
-    files = [x for x in p if x.is_file()]
-    latest = max(files , key = os.path.getctime)
-    return latest
+
     
 def show_picture():
     global box
-    path = str(get_last_pic())
+    path = str(get_last_pic(lotname))
     picture = Picture(box, image=path, grid=[1,2],width=settings['picture_width'],height=settings['picture_height'])
 
 def view_pictures():
