@@ -32,6 +32,10 @@ init_gpio()
 camera = setup_camera()
 
 
+def destroy_kids(widget):
+    for e in widget.children:
+        e.destroy()
+
 def shutdown_cleanup():
     print("running cleanup")
     # asyncio.run(turn_off_plug())
@@ -50,7 +54,7 @@ def calibration():
 
 def new_lot():
     print("new lot")
-    global lotname, title
+    global lotname,title_text
     lotname = app.question("New Lot Number", "What is the lot number?")
 
     if lotname is not None and len(lotname) > 0:
@@ -84,10 +88,9 @@ def new_lot():
             # set up beam
             # GPIO.add_event_detect(settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
 
-            # draw ui
-            title.destroy()
-            title = Text(
-                main_box, text=f"Lot: {lotname}", size=14, font="Arial", grid=[0, 0, 4, 1])
+            #update UI
+            destroy_kids(title_box)
+            title_text = Text(title_box, text=f"Lot: {lotname}", size=20, font="Arial")
 
         except:
             print(traceback.format_exc())
@@ -151,9 +154,10 @@ def simulation(lot, cam):
 
 
 def show_picture():
-    global app_window
+    global content_box
     path = str(get_last_pic(lotname))
-    picture = Picture(app_window, image=path, grid=[
+    destroy_kids(content_box)
+    picture = Picture(content_box, image=path, grid=[
                       0, 1, 4, 1], width=settings['picture_width'], height=settings['picture_height'])
 
 
@@ -204,16 +208,20 @@ menubar = MenuBar(app,
                       [["Change Settings", settings_window_handler],
                           ["Calibration", calibration]],
                   ])
+#chnge font later
+# print(type(menubar._get_tk_config("font")))
 
 title_box = Box(app, width="fill", align="top", border=True)
-title_text = Text(title_box, text="title")
+title_text = Text(title_box, text="Creat a new lot or open one",size=20, font="Arial")
 
 buttons_box = Box(app, width="fill", align="bottom", border=True)
-Text(buttons_box, text="buttons")
+Text(buttons_box, text="CONVEYOR CONTROLS",size=20, font="Arial")
 stop_conveyor_button = PushButton(buttons_box, text="Stop Conveyor",
                                   command=turn_off_plug, align="left", width="fill", height="fill", pady=20)
+stop_conveyor_button.text_size= 20
 start_conveyor_button = PushButton(buttons_box, text="Start Conveyor",
                                    command=turn_on_plug, align="left", width="fill", height="fill", pady=20)
+start_conveyor_button.text_size= 20
 
 
 options_box = Box(app, height="fill", align="right", border=True)
@@ -222,11 +230,11 @@ Text(options_box, text="options")
 content_box = Box(app, align="top", width="fill", border=True)
 Text(content_box, text="content")
 
-form_box = Box(content_box, layout="grid",
-               width="fill", align="left", border=True)
-Text(form_box, grid=[0, 0], text="form", align="right")
-Text(form_box, grid=[0, 1], text="label", align="left")
-TextBox(form_box, grid=[1, 1], text="data", width="fill")
+# form_box = Box(content_box, layout="grid",
+#                width="fill", align="left", border=True)
+# Text(form_box, grid=[0, 0], text="form", align="right")
+# Text(form_box, grid=[0, 1], text="label", align="left")
+# TextBox(form_box, grid=[1, 1], text="data", width="fill")
 
 
 app.display()
