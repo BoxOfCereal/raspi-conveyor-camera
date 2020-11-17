@@ -20,7 +20,7 @@ def capture_image(lotname,camera):
 
 def get_last_pic(lotname) -> Path:
     """ returns the lastest picture in the current lot folder """
-    p = (settings['pictures_directory'] / lotname).glob('**/*')
+    p = Path(settings['pictures_directory'] + "/" + lotname).glob('**/*')
     files = [x for x in p if x.is_file()]
     latest = max(files , key = os.path.getctime)
     return latest

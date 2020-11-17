@@ -26,7 +26,8 @@ def load_settings():
             "pictures_directory" : '/home/pi/Documents/Lots',
             "bounce_time" : 200,
             "picture_delay" : 200 ,#IN MILISECONDS
-            "camera_shutter_speed" : 20000
+            "camera_shutter_speed" : 20000,
+            "smart_plug_ip":"192.168.0.39"
         }
         # Writing JSON content to a file using the dump method
         print("here")

@@ -1,31 +1,43 @@
 import asyncio
 from kasa import SmartPlug
 import traceback
+import logging
+from functools import wraps
 
 from modules.settings import load_settings
 settings = load_settings()
 
-async def init_plug():
-    """init smart plug with ip denoted in settings"""
-    try:
-        return SmartPlug(settings["smart_plug_ip"])
-    except:
-        print(traceback.format_exc())
-        
-    
 
-async def turn_on(plug):
+def aio_wrapper(f):
+    """wraps the async functions"""
+    @wraps(f)
+    def decor(*args,**kwargs):
+        return asyncio.run(f(*args,**kwargs))
+    return decor
+
+@aio_wrapper
+async def turn_on_plug():
     """turn on plug"""
     try:
-        plug.turn_on()
+        p = SmartPlug(settings["smart_plug_ip"])
+
+        await p.update()
+        logging.debug('Plug Turned On')
+
+        await p.turn_on()
     except:
-        print(traceback.format_exc())
+        logging.error(traceback.format_exc())
    
-
-async def turn_off(plug):
-    """turn on plug"""
+@aio_wrapper
+async def turn_off_plug():
+    """turn off plug"""
     try:
-        plug.turn_off()
+        p = SmartPlug(settings["smart_plug_ip"])
+
+        await p.update()
+        logging.debug('Plug Turned Off')
+
+        await p.turn_off()
     except:
-        print(traceback.format_exc())
+        logging.error(traceback.format_exc())
 
