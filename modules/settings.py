@@ -26,7 +26,7 @@ def load_settings():
             "pictures_directory" : '/home/pi/Documents/Recognize/Lots',
             "debug_directory": '/home/pi/Documents/Recognize/Debug',
             "bounce_time" : 200,
-            "picture_delay" : 200 ,#IN MILISECONDS
+            "beam_cooldown" : 1 ,#IN MILISECONDS
             "camera_shutter_speed" : 20000,
             "smart_plug_ip":"192.168.0.39"
         }

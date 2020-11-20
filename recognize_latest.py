@@ -35,6 +35,10 @@ logging.basicConfig(filename=settings["debug_directory"] + 'app.log', filemode='
                     format='%(name)s - %(levelname)s - %(message)s')
 logging.warning('This will get logged to a file')
 
+# check to make sure laser is aligned properly
+beam_status = GPIO.input(settings["beam_pin"])
+print(beam_status)
+
 
 def destroy_kids(widgets):
     for widget in widgets:
@@ -83,19 +87,10 @@ def new_lot():
             # capture_image(lotname ,camera)
 
             # starting conveyor
-            # asyncio.run(turn_on_plug())
             turn_on_plug()
 
-            # simulate
-
-            sim = partial(simulation, lotname)
-            app.after(3000, sim)
-            app.after(6000, sim)
-            app.after(8000, sim)
-            app.after(12000, sim)
-
             # set up beam
-            # GPIO.add_event_detect(settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
+            GPIO.add_event_detect(settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
 
             # update UI
             destroy_kids([title_box, options_box])
@@ -163,8 +158,12 @@ def beam_break_cb(chan):
         print('Input was HIGH')
     else:
         print('Input was LOW')
+        turn_off_plug()
         camera.capture_image(STATE["LOTNAME"])
-        show_picture()
+        sleep(settings["beam_cooldown"])
+        print("taking Picture")
+        show_picture(camera.last_picture)
+        turn_on_plug()
 
 
 def beam_break_cb_simulation(lot):
@@ -189,26 +188,37 @@ def show_picture(path):
 def view_pictures():
     pass
 
-# # Program to demonstrate conditional operator 
-# a, b = 10, 20
-  
-# # Copy value of a in min if a < b else copy b 
-# min = a if a < b else b 
+def isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
 
+def encode_strings(string):
+    """None general helper to help serialize the correct types"""
+    if (string.isdigit()):
+        return (int(string))
+    elif (isfloat(string)):
+        return float(string)
+    else:
+        return string
+
+
+#  {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
 def serialize(lst):
-    dic = {}
-    for i in range(0,len(lst),2):
-        key = lst[i].value
-        value = int(lst[i+1].value) if lst[i+1].value.isdigit() else lst[i+1].value
-        dic[key] = value 
+    dic = {lst[i]: encode_strings(lst[i + 1]) for i in range(0, len(lst), 2)}
     return dic
 
 def save_btn_handler():
-    lst = settings_box.children
-    # settings_dict = {lst[i].value: lst[i + 1].value for i in range(0, len(lst), 2)}
+    global settings
+    lst = [x.value for x in settings_box.children]
+    print(lst)
     settings_dict = serialize(lst)
     print(settings_dict)
     save_settings(settings_dict)
+    # reload settings
+    settings = load_settings()
 
 
 def cancel_btn_handler():
@@ -219,6 +229,7 @@ def cancel_btn_handler():
 app = App(title="Conveyor Image Capture",
           width=settings['window_width'], height=settings['window_height'])
 app.when_closed = shutdown_cleanup
+
 
 # settings window
 settings_window = Window(app, title="Settings",
@@ -283,12 +294,6 @@ take_picture_button.text_size = 20
 
 content_box = Box(app, align="top", width="fill", border=True)
 Text(content_box, text="content")
-
-# form_box = Box(content_box, layout="grid",
-#                width="fill", align="left", border=True)
-# Text(form_box, grid=[0, 0], text="form", align="right")
-# Text(form_box, grid=[0, 1], text="label", align="left")
-# TextBox(form_box, grid=[1, 1], text="data", width="fill")
 
 
 app.display()
