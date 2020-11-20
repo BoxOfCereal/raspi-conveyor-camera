@@ -23,7 +23,8 @@ def load_settings():
             "gui_preview_y" : 100,
             "beam_pin" : 10,
             "pic_taken_led" : 8,
-            "pictures_directory" : '/home/pi/Documents/Lots',
+            "pictures_directory" : '/home/pi/Documents/Recognize/Lots',
+            "debug_directory": '/home/pi/Documents/Recognize/Debug',
             "bounce_time" : 200,
             "picture_delay" : 200 ,#IN MILISECONDS
             "camera_shutter_speed" : 20000,
@@ -36,7 +37,7 @@ def load_settings():
     return default_settings
 
 def save_settings(settings_dict):
-    settings_file = Path("./settings.py")
+    settings_file = Path.cwd() / 'settings.json'
     if settings_file.is_file():
         # file exists
         with open(settings_file, 'w') as f:

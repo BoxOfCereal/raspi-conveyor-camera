@@ -1,15 +1,1 @@
-{
-    "beam_pin": 10,
-    "bounce_time": 200,
-    "camera_shutter_speed": 20000,
-    "gui_preview_x": 100,
-    "gui_preview_y": 100,
-    "pic_taken_led": 8,
-    "picture_delay": 200,
-    "picture_height": 400,
-    "picture_width": 300,
-    "pictures_directory": "/home/pi/Documents/Lots",
-    "window_height": 600,
-    "window_width": 800,
-    "smart_plug_ip":"192.168.0.39"
-}
+{"beam_pin": 10, "bounce_time": 201, "camera_shutter_speed": 20000, "debug_directory": "/home/pi/Documents/Recognize/Debug", "gui_preview_x": 100, "gui_preview_y": 100, "pic_taken_led": 8, "picture_delay": 200, "picture_height": 400, "picture_width": 300, "pictures_directory": "/home/pi/Documents/Recognize/Lots", "smart_plug_ip": "192.168.0.39", "window_height": 600, "window_width": 800}
