@@ -19,7 +19,7 @@ from modules.settings import load_settings, save_settings
 from modules.io import init_gpio
 from modules.camera_funcs import Camera
 from modules.plug import turn_off_plug, turn_on_plug
-from modules.helpers import destroy_kids,serialize
+from modules.helpers import destroy_kids, serialize
 
 STATE = {
     "LOTNAME": None
@@ -84,7 +84,8 @@ def new_lot():
             turn_on_plug()
 
             # set up beam
-            GPIO.add_event_detect(settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
+            GPIO.add_event_detect(
+                settings['beam_pin'], GPIO.BOTH, callback=beam_break_cb)
 
             # update UI
             destroy_kids([title_box, options_box])
