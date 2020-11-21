@@ -19,6 +19,7 @@ from modules.settings import load_settings, save_settings
 from modules.io import init_gpio
 from modules.camera_funcs import Camera
 from modules.plug import turn_off_plug, turn_on_plug
+from modules.helpers import destroy_kids,serialize
 
 STATE = {
     "LOTNAME": None
@@ -38,13 +39,6 @@ logging.warning('This will get logged to a file')
 # check to make sure laser is aligned properly
 beam_status = GPIO.input(settings["beam_pin"])
 print(beam_status)
-
-
-def destroy_kids(widgets):
-    for widget in widgets:
-        for e in widget.children:
-            print(e)
-            e.destroy()
 
 
 def take_picture_handler():
@@ -185,31 +179,6 @@ def show_picture(path):
                       0, 1, 4, 1], width=settings['picture_width'], height=settings['picture_height'])
 
 
-def view_pictures():
-    pass
-
-def isfloat(value):
-  try:
-    float(value)
-    return True
-  except ValueError:
-    return False
-
-def encode_strings(string):
-    """None general helper to help serialize the correct types"""
-    if (string.isdigit()):
-        return (int(string))
-    elif (isfloat(string)):
-        return float(string)
-    else:
-        return string
-
-
-#  {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
-def serialize(lst):
-    dic = {lst[i]: encode_strings(lst[i + 1]) for i in range(0, len(lst), 2)}
-    return dic
-
 def save_btn_handler():
     global settings
     lst = [x.value for x in settings_box.children]
@@ -264,7 +233,7 @@ menubar = MenuBar(app,
                   toplevel=["Lots", "Edit"],
                   options=[
                       [["New Lot", new_lot], ["Open Lot", open_lot], [
-                          "Edit Lot Name", edit_lot], ["View Pictures", view_pictures]],
+                          "Edit Lot Name", edit_lot]],
                       [["Change Settings", settings_window_handler]],
                   ])
 # chnge font later
